@@ -5,7 +5,6 @@ import com.teamtreehouse.techdegrees.model.Todo;
 import org.sql2o.Connection;
 import org.sql2o.Sql2o;
 import org.sql2o.Sql2oException;
-
 import java.util.List;
 
 public class Sql2oTodoDao implements TodoDao{
@@ -16,19 +15,16 @@ public class Sql2oTodoDao implements TodoDao{
     }
 
     @Override
-    public List<Todo> findAll() {
-        try(Connection connection = sql2o.open()){
+    public List<Todo> findAll() throws DaoException {
+        try(Connection connection = sql2o.open()) {
             return connection.createQuery("SELECT * FROM todoTable")
                     .executeAndFetch(Todo.class);
+        } catch(Sql2oException ex) {
+            ex.printStackTrace();
+            throw new DaoException(ex, "Problem finding all tasks");
         }
     }
 
-    @Override
-    public Todo findById(int id) {
-        return null;
-    }
-
-    // CREATE
     @Override
     public void create(Todo todo) throws DaoException {
         String insertSql = "INSERT INTO todoTable(name, isCompleted) VALUES (:name, :isCompleted)";
@@ -38,12 +34,11 @@ public class Sql2oTodoDao implements TodoDao{
                     .executeUpdate()
                     .getKey();
             todo.setId(id);
-        } catch(Sql2oException ex){
+        } catch(Sql2oException ex) {
             ex.printStackTrace();
             throw new DaoException(ex, "Problem creating task");
         }
     }
-
 
     @Override
     public void update(Todo todo) throws DaoException {

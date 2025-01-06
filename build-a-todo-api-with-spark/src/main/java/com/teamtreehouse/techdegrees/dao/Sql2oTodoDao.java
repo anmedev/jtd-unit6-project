@@ -26,6 +26,19 @@ public class Sql2oTodoDao implements TodoDao{
     }
 
     @Override
+    public Todo findById(int id) throws DaoException {
+        String findByIdSql = "SELECT * FROM todoTable WHERE id = :id";
+        try (Connection connection = sql2o.open()) {
+            return connection.createQuery(findByIdSql)
+                    .addParameter("id", id)
+                    .executeAndFetchFirst(Todo.class);
+        } catch (Sql2oException ex) {
+            ex.printStackTrace();
+            throw new DaoException(ex, "Problem finding task by ID");
+        }
+    }
+
+    @Override
     public void create(Todo todo) throws DaoException {
         String insertSql = "INSERT INTO todoTable(name, isCompleted) VALUES (:name, :isCompleted)";
         try(Connection connection = sql2o.open()){

@@ -59,7 +59,9 @@ public class Sql2oTodoDao implements TodoDao{
         String updateSql = "UPDATE todoTable SET name = :name, isCompleted = :isCompleted WHERE id = :id";
         try (Connection connection = sql2o.open()) {
             connection.createQuery(updateSql)
-                    .bind(todo)
+                    .addParameter("name", todo.getName())
+                    .addParameter("isCompleted", todo.isCompleted())
+                    .addParameter("id", todo.getId())
                     .executeUpdate();
         } catch (Sql2oException ex) {
             ex.printStackTrace();
@@ -73,12 +75,11 @@ public class Sql2oTodoDao implements TodoDao{
         String deleteSql = "DELETE FROM todoTable WHERE id = :id";
         try (Connection connection = sql2o.open()) {
             connection.createQuery(deleteSql)
-                    .bind(todo)
+                    .addParameter("id", todo.getId())
                     .executeUpdate();
         } catch (Sql2oException ex) {
             ex.printStackTrace();
             throw new DaoException(ex, "Problem deleting task");
         }
-
     }
 }

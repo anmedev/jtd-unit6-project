@@ -41,13 +41,14 @@ public class Sql2oTodoDao implements TodoDao{
     @Override
     public void create(Todo todo) throws DaoException {
         String insertSql = "INSERT INTO todoTable(name, isCompleted) VALUES (:name, :isCompleted)";
-        try(Connection connection = sql2o.open()){
+        try (Connection connection = sql2o.open()) {
             int id = (int) connection.createQuery(insertSql)
-                    .bind(todo)
+                    .addParameter("name", todo.getName())
+                    .addParameter("isCompleted", todo.isCompleted())
                     .executeUpdate()
                     .getKey();
             todo.setId(id);
-        } catch(Sql2oException ex) {
+        } catch (Sql2oException ex) {
             ex.printStackTrace();
             throw new DaoException(ex, "Problem creating task");
         }

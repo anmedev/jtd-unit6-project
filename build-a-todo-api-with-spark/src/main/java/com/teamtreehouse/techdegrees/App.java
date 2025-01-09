@@ -31,13 +31,33 @@ public class App {
         // GET Route to fetch all the todos in the list
         get("/api/v1/todos", "application/json", (req, res) -> todoDao.findAll(), gson::toJson);
 
+        // GET Route to fetch a specific todo
+        get("/api/v1/todos/:id", "application/json", (req, res) -> {
+            int id = Integer.parseInt(req.params("id"));
+            Todo todo = todoDao.findById(id);
+            if (todo == null) {
+                throw new AppError(404, "Couldn't find the todo with this id " + id);
+            }
+            return todo;
+        }, gson::toJson);
+
+        exception(AppError.class, (exc, req, res) -> {
+            AppError err = (AppError) exc;
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("status", err.getStatus());
+            jsonMap.put("errorMessage", err.getMessage());
+            res.type("application/json");
+            res.status(err.getStatus());
+            res.body(gson.toJson(jsonMap));
+        });
+
         // PUT Route to update an existing todo in the list
         put("/api/v1/todos/:id", "application/json", (req, res) -> {
             int id = Integer.parseInt(req.params("id"));
             Todo existingTodo = todoDao.findById(id);
             Todo updatedTodo = gson.fromJson(req.body(), Todo.class);
             if (existingTodo == null) {
-                throw new AppError(404, "Couldn't find the course with this id " + id);
+                throw new AppError(404, "Couldn't find the todo with this id " + id);
             }
             existingTodo.setId(updatedTodo.getId());
             existingTodo.setName(updatedTodo.getName());

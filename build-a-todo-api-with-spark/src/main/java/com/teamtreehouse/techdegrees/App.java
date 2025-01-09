@@ -63,8 +63,8 @@ public class App {
             existingTodo.setId(updatedTodo.getId());
             existingTodo.setName(updatedTodo.getName());
             existingTodo.setCompleted(updatedTodo.isCompleted());
-            todoDao.update(updatedTodo);
-            return updatedTodo;
+            todoDao.update(existingTodo);
+            return existingTodo;
         }, gson::toJson);
 
         exception(AppError.class, (exc, req, res) -> {

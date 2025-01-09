@@ -77,7 +77,7 @@ public class App {
             res.body(gson.toJson(jsonMap));
         });
 
-        // DELETE route to delete a todo
+        // DELETE Route to delete a todo
         delete("/api/v1/todos/:id", "application/json", (req, res) -> {
             int id = Integer.parseInt(req.params("id"));
             Todo todo = todoDao.findById(id);

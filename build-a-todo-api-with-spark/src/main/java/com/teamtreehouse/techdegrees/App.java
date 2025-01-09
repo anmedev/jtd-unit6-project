@@ -6,10 +6,8 @@ import com.teamtreehouse.techdegrees.dao.TodoDao;
 import com.teamtreehouse.techdegrees.exc.AppError;
 import com.teamtreehouse.techdegrees.model.Todo;
 import org.sql2o.Sql2o;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import static spark.Spark.*;
 
 public class App {
@@ -25,18 +23,21 @@ public class App {
             Todo todo = gson.fromJson(req.body(), Todo.class);
             todoDao.create(todo);
             res.status(201);
+
             return todo;
         }, gson::toJson);
 
         // GET Route to fetch all the todos in the list
-        get("/api/v1/todos", "application/json", (req, res) -> todoDao.findAll(), gson::toJson);
+        get("/api/v1/todos", "application/json", (req, res) ->
+                todoDao.findAll(),
+                gson::toJson);
 
         // GET Route to fetch a specific todo
         get("/api/v1/todos/:id", "application/json", (req, res) -> {
             int id = Integer.parseInt(req.params("id"));
             Todo todo = todoDao.findById(id);
             if (todo == null) {
-                throw new AppError(404, "Couldn't find the todo with this id " + id);
+                throw new AppError(404, "Could not find the todo with this id: " + id);
             }
             return todo;
         }, gson::toJson);
@@ -57,7 +58,7 @@ public class App {
             Todo existingTodo = todoDao.findById(id);
             Todo updatedTodo = gson.fromJson(req.body(), Todo.class);
             if (existingTodo == null) {
-                throw new AppError(404, "Couldn't find the todo with this id " + id);
+                throw new AppError(404, "Could not find the todo with this id to update " + id);
             }
             existingTodo.setId(updatedTodo.getId());
             existingTodo.setName(updatedTodo.getName());
@@ -76,6 +77,26 @@ public class App {
             res.body(gson.toJson(jsonMap));
         });
 
+        // DELETE route to delete a todo
+        delete("/api/v1/todos/:id", "application/json", (req, res) -> {
+            int id = Integer.parseInt(req.params("id"));
+            Todo todo = todoDao.findById(id);
+            if (todo == null) {
+                throw new AppError(404, "Could not find the todo with this id to delete " + id);
+            }
+            todoDao.delete(todo);
+            res.status(204);
+            return "";
+        });
 
+        exception(AppError.class, (exc, req, res) -> {
+            AppError err = (AppError) exc;
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("status", err.getStatus());
+            jsonMap.put("errorMessage", err.getMessage());
+            res.type("application/json");
+            res.status(err.getStatus());
+            res.body(gson.toJson(jsonMap));
+        });
     }
 }
